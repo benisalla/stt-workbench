@@ -78,11 +78,69 @@ greedy decoding, one CPU with two threads.
 
 | model | parameters | val WER | val CER | time |
 |---|---|---|---|---|
-RESULTS_SYNTHETIC
+| `ctc` | 1.04 M | **2.4%** | **0.6%** | 20 min |
+| `rnnt` | 1.20 M | **5.3%** | **1.3%** | 8 min (800 steps) |
+| `hybrid` | 1.34 M | 60.0% | 67.8% | 14 min |
+| `las` | 1.18 M | 101.2% | 63.7% | 12 min |
+| `aed` | 1.34 M | 107.1% | 90.5% | 15 min |
+
+The CTC and RNN-T models learn the language in a few hundred steps. The three attention
+decoders have not found the alignment yet at 1 500 steps on 400 sentences: attention has to
+*discover* where to look, while CTC and RNN-T get monotonic alignment for free. The next table
+gives them more data and steps.
+
+![synthetic curves](docs/images/synthetic_curves.png)
+
+### Synthetic toy language, more data and steps (1 600 train / 100 val sentences, 3 000 steps)
+
+Same models and settings, `stt-data synthetic --n-train 1600 --n-val 100 --seed 1`, 3 000 steps:
+
+| model | parameters | val WER | val CER | time |
+|---|---|---|---|---|
+| `las` | 1.18 M | **0.0%** | **0.0%** | 22 min |
+| `hybrid` | 1.34 M | 21.7% | 11.6% | 15 min |
+| `aed` | 1.34 M | 70.4% | 38.8% | 20 min |
+
+With four times the data the attention decoders find the alignment. `las` (LSTM decoder with
+location-aware attention) goes from 30.6% WER at step 500 to zero errors on all 100 validation
+sentences from step 1 000 on; the location feature tells it where it looked last, which is
+exactly the monotonic prior this task needs. The plain Transformer decoder (`aed`) is the
+slowest to discover it and is still improving at 3 000 steps, and `hybrid` lands in between
+because its CTC branch guides the encoder from the start.
+
+![synthetic-big curves](docs/images/synthetic_big_curves.png)
 
 ### FSDD: real spoken digits, 3 per clip, held-out speaker (830 train / 166 val clips)
 
-RESULTS_FSDD
+| model | parameters | val WER | val CER | time |
+|---|---|---|---|---|
+| `ctc` | 1.04 M | **24.7%** | **13.9%** | 7 min (1 000 steps) |
+| `hybrid` | 1.34 M | 39.8% | 32.9% | 8 min (1 000 steps) |
+
+Same CTC checkpoint, three decoders (`scripts/compare_decoders.py`):
+
+| decoding | val WER | val CER | time (166 clips) |
+|---|---|---|---|
+| greedy | 24.7% | 13.1% | 2 s |
+| beam 8 | 24.1% | 12.8% | 6 s |
+| beam 8 + character 5-gram LM (weight 0.3) | **15.1%** | 12.1% | 7 s |
+
+The LM, trained on the 830 training transcripts, knows that only ten words exist and removes
+most of the partial words ("even" for "seven"); on the toy language, whose words are random
+letters, the same LM changes nothing (2.4% to 2.9%). The word confusion matrix of the greedy
+decoder shows where the rest of the errors are: "six" of the unseen speaker is the one digit the
+model often drops or hears as "eight" (the `<del>` column is deletions).
+
+![fsdd confusion](docs/images/fsdd_confusion.png)
+
+### YESNO: 60 real clips of "yes" / "no" (42 train / 18 val)
+
+| model | parameters | val WER | val CER | time |
+|---|---|---|---|---|
+| `ctc` | 1.03 M | 56.9% | 39.6% | 3 min (300 steps) |
+
+42 training clips are too few to generalise (the model knows "yes" and "no" but misses word
+boundaries); the set is here to check the pipeline on real 8 kHz audio in three minutes.
 
 The full numbers, commands and curves are in [docs/evaluation.md](docs/evaluation.md).
 
