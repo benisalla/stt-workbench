@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "stt-workbench"
+version = "0.1.0"
+description = "Speech-to-text (ASR) workbench in PyTorch: CTC, attention encoder-decoder, LAS, hybrid CTC/attention, RNN-Transducer and wav2vec2/Whisper fine-tuning, with BiLSTM / Transformer / Conformer encoders, WER/CER evaluation and a Kaggle/Colab notebook."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = [
+  "speech-recognition", "asr", "speech-to-text", "ctc", "rnn-transducer", "transducer", "conformer",
+  "transformer", "attention", "listen-attend-spell", "hybrid-ctc-attention", "beam-search", "whisper",
+  "wav2vec2", "pytorch", "deep-learning", "kaggle", "colab", "wer", "specaugment", "educational",
+]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "soundfile>=0.12",
+  "torch>=2.4",
+]
+
+[project.scripts]
+stt-train = "stt.train:main"
+stt-transcribe = "stt.transcribe:main"
+stt-eval = "stt.metrics:main"
+stt-data = "stt.datasets:main"
+stt-export = "stt.export:main"
+
+[project.optional-dependencies]
+rnnt = ["torchaudio>=2.4"]
+pretrained = ["transformers>=4.40"]
+bpe = ["sentencepiece>=0.2"]
+onnx = ["onnx>=1.16", "onnxruntime>=1.18"]
+dev = ["pytest>=8", "ruff>=0.9", "nbformat>=5.10"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stt"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+extend-exclude = ["notebooks/*.ipynb"]  # generated from src/ by notebooks/build_notebook.py
