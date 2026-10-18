@@ -11,3 +11,4 @@ data/
 *.wav
 *.tar.gz
 *.zip
+examples/output/

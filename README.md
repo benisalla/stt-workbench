@@ -66,6 +66,17 @@ Swap `--model` for `aed`, `las`, `hybrid` or `rnnt`, and `--encoder` for `bilstm
 give real 8 kHz recordings; `stt-data librispeech` / `ljspeech` / `commonvoice` prepare the
 big ones ([docs/data.md](docs/data.md)).
 
+## Examples
+
+[`examples/`](examples/README.md) holds five short scripts that use the package from Python,
+in order: train a small CTC model on the toy language in about a minute, transcribe and
+score the validation clips, add a character n-gram LM to the beam search, draw the front end
+(log-mel, CMVN, SpecAugment), and run every model and encoder on a random batch.
+
+```bash
+python examples/01_train_on_toy_data.py && python examples/02_transcribe_and_score.py
+```
+
 ## Results on simple, low-quality audio
 
 These are short CPU runs whose only purpose is to show that every approach learns and that
@@ -172,6 +183,7 @@ src/stt/
   export.py      ONNX export of the encoder + CTC head, `stt-export`
   pretrained.py  wav2vec2 and Whisper fine-tuning wrappers
 docs/            architecture, data, training, inference, evaluation, testing
+examples/        five scripts: train, transcribe, beam + LM, front end, model zoo
 tests/           80 tests, ~10 s on a CPU
 notebooks/       build_notebook.py -> train_colab_kaggle.ipynb
 ```
@@ -184,6 +196,7 @@ notebooks/       build_notebook.py -> train_colab_kaggle.ipynb
 - [docs/inference.md](docs/inference.md): the decoding algorithms, LM fusion, ONNX
 - [docs/evaluation.md](docs/evaluation.md): WER/CER, the runs behind the results above
 - [docs/testing.md](docs/testing.md): what the tests check
+- [examples/](examples/README.md): the package from Python, step by step
 
 ## References
 
